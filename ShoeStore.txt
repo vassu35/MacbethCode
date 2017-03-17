@@ -1,0 +1,79 @@
+package Macbeth;
+
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.ie.InternetExplorerDriver;
+
+public class ShoeStore {
+	
+	 public static void main(String[] args) {
+		 
+	        String baseUrl = "http://shoestore-manheim.rhcloud.com";
+	        
+		 	System.setProperty("webdriver.ie.driver","C:\\selenium-drivers\\IEDriverServer_x64_3.3.0\\IEDriverServer.exe");
+	        WebDriver driver = new InternetExplorerDriver();               
+
+	        driver.get(baseUrl);
+                driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS); 
+	 	        
+	        List<WebElement> linkElementCSS =  driver.findElements(By.cssSelector("#header_nav li")); 
+	        
+	        for(int i=1; i<13;i++){
+	        	
+	        	  linkElementCSS.get(i).click();
+	        	  driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+	        	  
+	        	  // To verify images
+	        	  List<WebElement> imgElements = driver.findElements(By.xpath("//*[contains(@src, '.jpg')]"));     
+	   	      
+		   	      for (WebElement shoeImg : imgElements){
+		   	    	  Boolean imageLoaded = (Boolean) ((JavascriptExecutor)driver)
+		   	    		        .executeScript
+		   	    		        (
+		   	    		            "return arguments[0].complete && type of arguments[0].naturalWidth != \"undefined\" && arguments[0].naturalWidth > 0", shoeImg
+		   	    		        )  ; 
+	
+		   	    		     if (!imageLoaded)
+		   	    		     {
+		   	    		         System.out.println("Found broken image: "+shoeImg.getAttribute("src"));
+		   	    		     }
+		   	      }  
+		   	      
+		   	      //To verify Price
+		   	      List<WebElement> shoeList = driver.findElements(By.cssSelector(".shoe_result_row"));
+		   	      for (WebElement shoeResult : shoeList)
+		   	       {	    	 
+		   	    	   if(shoeResult.getText().startsWith("Price", 0)){
+		   	    		   
+		   	    		   if(!(shoeResult.getText().charAt(6)=='$')){
+		   	    			   System.out.println("Price not avaible ");
+		   	    		   }
+		   	    	   }		   	    	   
+		   	       }	        	
+	        }
+	        
+	      
+	       
+	   //Story 2: Submit email for reminder  
+	       	       
+	       String emailId = "abc@gmail.com";
+	       String emailConftext = "Thanks! We will notify you of our new shoes at this email:"+""+emailId;
+	       
+	       driver.findElement(By.name("email")).sendKeys(emailId);
+	       driver.findElement(By.xpath("//input[@name='email']")).submit();	
+	       
+	       assert(emailConftext.equals(driver.findElement(By.xpath("//*[@id=\"flash\"]/div")).getText()));
+
+	       driver.quit();
+
+	    }
+	 
+	 
+	
+}
